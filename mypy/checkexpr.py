@@ -1799,8 +1799,15 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
         arg_types = self.infer_arg_types_in_context(callee, args, arg_kinds, formal_to_actual)
 
         self.check_call_arguments(
-            callee, arg_types, arg_kinds, arg_names, args,
-            formal_to_actual, context, callable_name, object_type,
+            callee,
+            arg_types,
+            arg_kinds,
+            arg_names,
+            args,
+            formal_to_actual,
+            context,
+            callable_name,
+            object_type,
         )
 
         if (
@@ -2345,8 +2352,14 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
         """Check argument count and types, consolidating errors for missing positional args."""
         with self.msg.filter_errors():
             _, missing_positional = self.check_argument_count(
-                callee, arg_types, arg_kinds, arg_names, formal_to_actual,
-                context, object_type, callable_name,
+                callee,
+                arg_types,
+                arg_kinds,
+                arg_names,
+                formal_to_actual,
+                context,
+                object_type,
+                callable_name,
             )
 
         if missing_positional:
@@ -2363,8 +2376,13 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
 
             with self.msg.filter_errors() as type_error_watcher:
                 self.check_argument_types(
-                    arg_types, arg_kinds, args, callee, formal_to_actual, context,
-                    object_type=object_type
+                    arg_types,
+                    arg_kinds,
+                    args,
+                    callee,
+                    formal_to_actual,
+                    context,
+                    object_type=object_type,
                 )
             has_type_errors = type_error_watcher.has_new_errors()
 
@@ -2392,17 +2410,34 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
                 )
             else:
                 self.check_argument_count(
-                    callee, arg_types, arg_kinds, arg_names, formal_to_actual,
-                    context, object_type, callable_name,
+                    callee,
+                    arg_types,
+                    arg_kinds,
+                    arg_names,
+                    formal_to_actual,
+                    context,
+                    object_type,
+                    callable_name,
                 )
         else:
             self.check_argument_count(
-                callee, arg_types, arg_kinds, arg_names, formal_to_actual,
-                context, object_type, callable_name,
+                callee,
+                arg_types,
+                arg_kinds,
+                arg_names,
+                formal_to_actual,
+                context,
+                object_type,
+                callable_name,
             )
             self.check_argument_types(
-                arg_types, arg_kinds, args, callee, formal_to_actual, context,
-                object_type=object_type
+                arg_types,
+                arg_kinds,
+                args,
+                callee,
+                formal_to_actual,
+                context,
+                object_type=object_type,
             )
 
     def detect_shifted_positional_args(
@@ -2452,7 +2487,9 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
             next_idx = i + 1
             if next_idx >= len(positional_formal_types):
                 break
-            if is_subtype(actual_type, positional_formal_types[next_idx], options=self.chk.options):
+            if is_subtype(
+                actual_type, positional_formal_types[next_idx], options=self.chk.options
+            ):
                 shift_position = i
                 break
             else:
@@ -2475,10 +2512,7 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
         )
 
     def _validate_shift_insertion(
-        self,
-        actual_types: list[Type],
-        formal_types: list[Type],
-        insert_position: int,
+        self, actual_types: list[Type], formal_types: list[Type], insert_position: int
     ) -> bool:
         """Check if inserting an argument at insert_position would fix type errors."""
         for i, actual_type in enumerate(actual_types):
