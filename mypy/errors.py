@@ -828,7 +828,7 @@ class Errors:
             )
         return False
 
-    def is_error_code_ignored(self, line: int, code: ErrorCode) -> bool:
+    def is_ignored_error_code(self, line: int, code: ErrorCode) -> bool:
         """Check if an error with the given code on the given line would be ignored.
 
         This is useful to skip expensive error message processing (e.g. fuzzy matching)
