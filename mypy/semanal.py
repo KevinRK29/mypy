@@ -7480,6 +7480,7 @@ class SemanticAnalyzer(
             and "." not in name
             and not (name.startswith("__") and name.endswith("__"))
             and f"builtins.{name}" not in SUGGESTED_TEST_FIXTURES
+            and not self.errors.is_error_code_ignored(ctx.line, codes.NAME_DEFINED)
         ):
             alternatives = self._get_names_in_scope()
             alternatives.discard(name)
@@ -7515,7 +7516,7 @@ class SemanticAnalyzer(
 
         This includes:
         - Local variables (from function scopes)
-        - Class attributes (if it's inside a class)
+        - Class attributes (only when directly in class body, not in methods)
         - Global/module-level names
         - Builtins
         """
@@ -7525,7 +7526,8 @@ class SemanticAnalyzer(
             if table is not None:
                 names.update(table.keys())
 
-        if self.type is not None:
+        if self.is_class_scope():
+            assert self.type is not None
             names.update(self.type.names.keys())
 
         names.update(self.globals.keys())
