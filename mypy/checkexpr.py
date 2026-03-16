@@ -1807,9 +1807,7 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
         if (
             not ok
             and not self.msg.prefer_simple_messages()
-            and self._detect_missing_positional_arg(
-                callee, arg_types, arg_kinds, args, context
-            )
+            and self._detect_missing_positional_arg(callee, arg_types, arg_kinds, args, context)
         ):
             pass
         else:
