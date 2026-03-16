@@ -1792,8 +1792,42 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
 
         arg_types = self.infer_arg_types_in_context(callee, args, arg_kinds, formal_to_actual)
 
-        with self.msg.filter_errors(save_filtered_errors=True) as w:
-            ok = self.check_argument_count(
+        might_have_shifted_args = (
+            not self.msg.prefer_simple_messages()
+            and all(k == ARG_POS for k in callee.arg_kinds)
+            and all(k == ARG_POS for k in arg_kinds)
+            and len(arg_kinds) == len(callee.arg_kinds) - 1
+        )
+
+        if might_have_shifted_args:
+            with self.msg.filter_errors(save_filtered_errors=True) as w:
+                ok = self.check_argument_count(
+                    callee,
+                    arg_types,
+                    arg_kinds,
+                    arg_names,
+                    formal_to_actual,
+                    context,
+                    object_type,
+                    callable_name,
+                )
+            if not ok and self._detect_missing_positional_arg(
+                callee, arg_types, arg_kinds, args, context
+            ):
+                pass
+            else:
+                self.msg.add_errors(w.filtered_errors())
+                self.check_argument_types(
+                    arg_types,
+                    arg_kinds,
+                    args,
+                    callee,
+                    formal_to_actual,
+                    context,
+                    object_type=object_type,
+                )
+        else:
+            self.check_argument_count(
                 callee,
                 arg_types,
                 arg_kinds,
@@ -1803,15 +1837,6 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
                 object_type,
                 callable_name,
             )
-
-        if (
-            not ok
-            and not self.msg.prefer_simple_messages()
-            and self._detect_missing_positional_arg(callee, arg_types, arg_kinds, args, context)
-        ):
-            pass
-        else:
-            self.msg.add_errors(w.filtered_errors())
             self.check_argument_types(
                 arg_types,
                 arg_kinds,
