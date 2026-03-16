@@ -73,6 +73,12 @@ def some_function(x: int) -> int:
 x = lenn  # E: Name "lenn" is not defined; did you mean "len"?  [name-defined]
 [builtins fixtures/len.pyi]
 
+[case testErrorCodeUndefinedNameSuggestionIgnored]
+my_variable = 42
+x = my_variabel  # type: ignore[name-defined]
+y = my_variabel  # type: ignore
+[builtins fixtures/module.pyi]
+
 [case testErrorCodeUnclassifiedError]
 class A:
     def __init__(self) -> int: \
