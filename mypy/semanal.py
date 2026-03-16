@@ -7533,8 +7533,8 @@ class SemanticAnalyzer(
         names.update(self.globals.keys())
 
         b = self.globals.get("__builtins__", None)
-        if b and isinstance(b.node, MypyFile):
-            # Only include public builtins (not _private ones)
+        if b:
+            assert isinstance(b.node, MypyFile)
             for builtin_name in b.node.names.keys():
                 if not (len(builtin_name) > 1 and builtin_name[0] == "_" and builtin_name[1] != "_"):
                     names.add(builtin_name)

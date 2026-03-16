@@ -838,6 +838,7 @@ class Errors:
         if line not in ignores:
             return False
         if not ignores[line]:
+            # Empty list means that we ignore all errors
             return True
         return (
             code.code in ignores[line]

@@ -73,6 +73,19 @@ def some_function(x: int) -> int:
 x = lenn  # E: Name "lenn" is not defined; did you mean "len"?  [name-defined]
 [builtins fixtures/len.pyi]
 
+[case testErrorCodeUndefinedNameSuggestionClassMethod]
+class Foo:
+    class_attr = 10
+    def method(self) -> None:
+        x = class_atr  # E: Name "class_atr" is not defined  [name-defined]
+[builtins fixtures/module.pyi]
+
+[case testErrorCodeUndefinedNameSuggestionMultiple]
+total_count = 1
+total_counts = 2
+x = total_countt  # E: Name "total_countt" is not defined; did you mean "total_count" or "total_counts"?  [name-defined]
+[builtins fixtures/module.pyi]
+
 [case testErrorCodeUndefinedNameSuggestionIgnored]
 my_variable = 42
 x = my_variabel  # type: ignore[name-defined]
