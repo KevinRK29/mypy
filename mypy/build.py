@@ -3192,7 +3192,11 @@ def module_not_found(
             code = codes.IMPORT
         errors.report(line, 0, msg.format(module=target), code=code)
 
-        if reason == ModuleNotFoundReason.NOT_FOUND and not errors.prefer_simple_messages():
+        if (
+            reason == ModuleNotFoundReason.NOT_FOUND
+            and not errors.prefer_simple_messages()
+            and line not in errors.ignored_lines.get(caller_state.xpath, {})
+        ):
             top_level_target = target.split(".")[0]
             if not top_level_target.startswith("_"):
                 known_modules = get_known_modules(
