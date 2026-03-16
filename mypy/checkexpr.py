@@ -1792,8 +1792,8 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
 
         arg_types = self.infer_arg_types_in_context(callee, args, arg_kinds, formal_to_actual)
 
-        if not self._detect_missing_positional_arg(callee, arg_types, arg_kinds, args, context):
-            self.check_argument_count(
+        with self.msg.filter_errors(save_filtered_errors=True) as w:
+            ok = self.check_argument_count(
                 callee,
                 arg_types,
                 arg_kinds,
@@ -1804,6 +1804,16 @@ class ExpressionChecker(ExpressionVisitor[Type], ExpressionCheckerSharedApi):
                 callable_name,
             )
 
+        if (
+            not ok
+            and not self.msg.prefer_simple_messages()
+            and self._detect_missing_positional_arg(
+                callee, arg_types, arg_kinds, args, context
+            )
+        ):
+            pass
+        else:
+            self.msg.add_errors(w.filtered_errors())
             self.check_argument_types(
                 arg_types,
                 arg_kinds,
