@@ -7480,7 +7480,7 @@ class SemanticAnalyzer(
             and "." not in name
             and not (name.startswith("__") and name.endswith("__"))
             and f"builtins.{name}" not in SUGGESTED_TEST_FIXTURES
-            and not self.errors.is_ignored_error_code(ctx.line, codes.NAME_DEFINED)
+            and ctx.line not in self.errors.ignored_lines.get(self.errors.file, {})
         ):
             alternatives = self._get_names_in_scope()
             alternatives.discard(name)

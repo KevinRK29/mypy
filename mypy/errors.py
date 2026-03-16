@@ -828,24 +828,6 @@ class Errors:
             )
         return False
 
-    def is_ignored_error_code(self, line: int, code: ErrorCode) -> bool:
-        """Check if an error with the given code on the given line would be ignored.
-
-        This is useful to skip expensive error message processing (e.g. fuzzy matching)
-        when the error will be suppressed anyway.
-        """
-        ignores = self.ignored_lines.get(self.file, {})
-        if line not in ignores:
-            return False
-        if not ignores[line]:
-            # Empty list means that we ignore all errors
-            return True
-        return (
-            code.code in ignores[line]
-            or code.sub_code_of is not None
-            and code.sub_code_of.code in ignores[line]
-        )
-
     def is_error_code_enabled(self, error_code: ErrorCode) -> bool:
         if self.options:
             current_mod_disabled = self.options.disabled_error_codes
