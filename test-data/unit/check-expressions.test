@@ -2609,10 +2609,10 @@ def f(foobar: str) -> None: ...
 def f(foobar: Union[int, str]) -> None: pass
 
 f(random=[1,2,3]) # E: Unexpected keyword argument "random" for overloaded function "f" \
+                  # E: No overload variant of "f" matches argument type "list[int]" \
                   # N: Possible overload variants: \
                   # N:     def f(foobar: int) -> None \
-                  # N:     def f(foobar: str) -> None \
-                  # E: No overload variant of "f" matches argument type "list[int]"
+                  # N:     def f(foobar: str) -> None
 [builtins fixtures/list.pyi]
 
 [case testOverloadMultipleUnexpectedKeywordArgs]
@@ -2661,10 +2661,10 @@ def f(foobar: Union[int, str]) -> None: pass
 
 f(fobar=1, other=[1,2,3]) # E: Unexpected keyword argument "fobar" for overloaded function "f"; did you mean "foobar"? \
                           # E: Unexpected keyword argument "other" for overloaded function "f" \
+                          # E: No overload variant of "f" matches argument types "int", "list[int]" \
                           # N: Possible overload variants: \
                           # N:     def f(foobar: int) -> None \
-                          # N:     def f(foobar: str) -> None \
-                          # E: No overload variant of "f" matches argument types "int", "list[int]"
+                          # N:     def f(foobar: str) -> None
 [builtins fixtures/list.pyi]
 
 [case testOverloadPositionalArgTypeMismatch]

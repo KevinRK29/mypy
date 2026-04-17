@@ -1182,15 +1182,6 @@ class MessageBuilder:
                         code=code,
                     )
 
-            if not all_kwargs_confident:
-                self.note(
-                    f"Possible overload variant{plural_s(len(overload.items))}:",
-                    context,
-                    code=code,
-                )
-                for item in overload.items:
-                    self.note(pretty_callable(item, self.options), context, offset=4, code=code)
-
             if all_kwargs_confident and len(unexpected_kwargs) == len(arg_types):
                 return
 
