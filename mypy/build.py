@@ -993,6 +993,11 @@ class BuildManager:
         self.import_options: dict[str, bytes] = {}
         # Cache for transitive dependency check (expensive).
         self.transitive_deps_cache: dict[tuple[int, int], bool] = {}
+        # Cache for options_snapshot() keyed by id() of the cloned Options.
+        # Most modules share a handful of distinct configs. The keepalive
+        # list keeps clones reachable so id() is stable for cache keys.
+        self.options_snapshot_cache: dict[int, tuple[str, str]] = {}
+        self._options_snapshot_keepalive: list[Options] = []
         # Packages for which we know presence or absence of __getattr__().
         self.known_partial_packages: dict[str, bool] = {}
 
@@ -1966,23 +1971,32 @@ def get_cache_names(id: str, path: str, options: Options) -> tuple[str, str, str
     return prefix + meta_suffix, prefix + data_suffix, deps_json
 
 
-def options_snapshot(id: str, manager: BuildManager) -> dict[str, object]:
+def options_snapshot(module: str, manager: BuildManager) -> dict[str, object]:
     """Make compact snapshot of options for a module.
 
     Separately store only the options we may compare individually, and take a hash
     of everything else. If --debug-cache is specified, fall back to full snapshot.
     """
-    platform_opt, values = manager.options.clone_for_module(id).select_options_affecting_cache()
+    cloned = manager.options.clone_for_module(module)
     if manager.options.debug_cache:
         # Build full options snapshot for debugging purposes.
+        platform_opt, values = cloned.select_options_affecting_cache()
         result: dict[str, object] = {"platform": platform_opt}
         for key, val in zip(OPTIONS_AFFECTING_CACHE_NO_PLATFORM, values):
             result[key] = val
         return result
-    # Process most options quickly, since this is performance critical.
-    buf = WriteBuffer()
-    write_json_value(buf, cast(JsonValue, values))
-    return {"platform": platform_opt, "other_options": hash_digest(buf.getvalue())}
+    cache = manager.options_snapshot_cache
+    key = id(cloned)
+    cached = cache.get(key)
+    if cached is None:
+        platform_opt, values = cloned.select_options_affecting_cache()
+        buf = WriteBuffer()
+        write_json_value(buf, cast(JsonValue, values))
+        cached = (platform_opt, hash_digest(buf.getvalue()))
+        cache[key] = cached
+        # Keep cloned reachable so its id() is not reused by a later clone.
+        manager._options_snapshot_keepalive.append(cloned)
+    return {"platform": cached[0], "other_options": cached[1]}
 
 
 def find_cache_meta(
