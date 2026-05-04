@@ -1472,9 +1472,7 @@ def process_options(
         try:
             options.num_workers = int(environ_num_workers)
         except ValueError:
-            parser.error(
-                f"MYPY_NUM_WORKERS must be an integer, got {environ_num_workers!r}"
-            )
+            parser.error(f"MYPY_NUM_WORKERS must be an integer, got {environ_num_workers!r}")
 
     # Parse command line for real, using a split namespace.
     special_opts = argparse.Namespace()
