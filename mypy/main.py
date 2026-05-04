@@ -1184,10 +1184,7 @@ def define_options(
         "--num-workers",
         type=int,
         default=0,
-        help=(
-            "Number of separate mypy worker processes (experimental). "
-            "Overrides the MYPY_NUM_WORKERS environment variable if set."
-        ),
+        help="Number of separate mypy worker processes (experimental)",
     )
 
     report_group = parser.add_argument_group(
@@ -1470,9 +1467,14 @@ def process_options(
     options.cache_dir = os.path.expanduser(options.cache_dir)
 
     # Override num_workers if provided in the environment
-    environ_num_workers = os.getenv("MYPY_NUM_WORKERS", "").strip()
-    if environ_num_workers:
-        options.num_workers = int(environ_num_workers)
+    environ_num_workers = os.getenv("MYPY_NUM_WORKERS", "")
+    if environ_num_workers.strip():
+        try:
+            options.num_workers = int(environ_num_workers)
+        except ValueError:
+            parser.error(
+                f"MYPY_NUM_WORKERS must be an integer, got {environ_num_workers!r}"
+            )
 
     # Parse command line for real, using a split namespace.
     special_opts = argparse.Namespace()
